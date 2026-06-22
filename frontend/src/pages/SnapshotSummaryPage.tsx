@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Card,
   Space,
@@ -9,7 +10,7 @@ import {
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { fetchAllSnapshots } from '../api/client';
+import { fetchSnapshots } from '../api/client';
 import type { Snapshot } from '../types';
 
 export default function SnapshotSummaryPage() {
@@ -19,10 +20,11 @@ export default function SnapshotSummaryPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchAllSnapshots();
+      const data = await fetchSnapshots();
       setSnapshots(data);
-    } catch {
-      message.error('加载快照汇总失败，请确认后端已启动');
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : '加载快照汇总失败，请确认后端已启动';
+      message.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -38,7 +40,10 @@ export default function SnapshotSummaryPage() {
       dataIndex: 'position_name',
       key: 'position_name',
       width: 160,
-      render: (value: string | undefined) => value ?? '-',
+      render: (value: string | undefined, record) =>
+        value ? (
+          <Link to={`/positions/${record.position_id}/snapshots`}>{value}</Link>
+        ) : '-',
     },
     {
       title: '记录日期',
