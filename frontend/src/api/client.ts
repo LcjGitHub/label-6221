@@ -6,6 +6,14 @@ const client = axios.create({
   timeout: 10000,
 });
 
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error?.response?.data?.detail ?? error?.message ?? '请求失败';
+    return Promise.reject(new Error(message));
+  },
+);
+
 /** 获取所有公告栏位置 */
 export async function fetchPositions(): Promise<Position[]> {
   const { data } = await client.get<Position[]>('/positions');

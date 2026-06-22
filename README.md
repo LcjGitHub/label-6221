@@ -1,7 +1,7 @@
 # 社区公告栏历史快照
 
-MVP：公告栏位置列表 + 快照记录页（CRUD）。  
-技术栈：React + Ant Design（前端 3101）| FastAPI + SQLite（后端 3000）。
+最小可行产品：公告栏位置列表 + 快照记录页（增删改查）。  
+技术栈：React + Ant Design（前端端口 3101）| FastAPI + SQLite（后端端口 3000）。
 
 ## 目录结构
 
@@ -36,7 +36,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 3000
 cd backend && .venv\Scripts\python -m uvicorn main:app --reload --host 0.0.0.0 --port 3000
 ```
 
-API 文档：http://localhost:3000/docs
+接口文档：http://localhost:3000/docs
 
 ### 2. 前端（端口 3101）
 
@@ -59,7 +59,7 @@ npm run dev
 
 ### 位置管理
 
-在位置列表页可对公告栏位置进行完整的 CRUD 操作：
+在位置列表页可对公告栏位置进行完整的增删改查操作：
 
 - **新增位置**：点击右上角「新增位置」按钮，填写位置名称和具体地点
 - **编辑位置**：点击操作列中的「编辑」按钮，修改位置信息
@@ -82,7 +82,7 @@ npm run dev
 - **是否满贴**：公告栏是否已贴满
 - **备注**：补充说明
 
-## Seed 数据
+## 初始数据
 
 首次启动后端自动写入：
 
@@ -92,4 +92,4 @@ npm run dev
 ## 依赖说明
 
 - 后端依赖安装在 `backend/.venv` 内，不依赖全局 Python 包
-- 前端依赖安装在 `frontend/node_modules`，使用 **npm**（无需全局 pnpm/yarn）
+- 前端依赖安装在 `frontend/node_modules`，使用 **npm**（无需全局包管理器）

@@ -83,9 +83,8 @@ export default function PositionListPage() {
       setModalOpen(false);
       loadData();
     } catch (error) {
-      if (error instanceof Error) {
-        message.error(error.message);
-      }
+      const errMsg = error instanceof Error ? error.message : '保存失败，请稍后重试';
+      message.error(editing ? `更新失败：${errMsg}` : `创建失败：${errMsg}`);
     }
   };
 
@@ -95,9 +94,8 @@ export default function PositionListPage() {
       message.success('位置已删除');
       loadData();
     } catch (error) {
-      if (error instanceof Error) {
-        message.error(error.message);
-      }
+      const errMsg = error instanceof Error ? error.message : '删除失败，请稍后重试';
+      message.error(`删除失败：${errMsg}`);
     }
   };
 
@@ -133,16 +131,12 @@ export default function PositionListPage() {
           </Button>
           <Popconfirm
             title="确定删除该位置？"
-            description={
-              record.snapshot_count > 0
-                ? `该位置仍关联 ${record.snapshot_count} 条快照记录，无法删除`
-                : '删除后无法恢复，请确认操作'
-            }
+            description="删除后无法恢复，请确认操作"
             onConfirm={() => handleDelete(record.id)}
-            disabled={record.snapshot_count > 0}
-            okButtonProps={{ disabled: record.snapshot_count > 0 }}
+            okText="确认删除"
+            cancelText="取消"
           >
-            <Button type="link" danger disabled={record.snapshot_count > 0}>
+            <Button type="link" danger>
               删除
             </Button>
           </Popconfirm>

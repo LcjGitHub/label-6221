@@ -112,9 +112,8 @@ export default function SnapshotPage() {
       setModalOpen(false);
       loadData();
     } catch (error) {
-      if (error instanceof Error) {
-        message.error(error.message);
-      }
+      const errMsg = error instanceof Error ? error.message : '保存失败，请稍后重试';
+      message.error(editing ? `更新失败：${errMsg}` : `创建失败：${errMsg}`);
     }
   };
 
@@ -123,8 +122,9 @@ export default function SnapshotPage() {
       await deleteSnapshot(id);
       message.success('快照已删除');
       loadData();
-    } catch {
-      message.error('删除失败');
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : '删除失败，请稍后重试';
+      message.error(`删除失败：${errMsg}`);
     }
   };
 
