@@ -16,6 +16,8 @@ import {
   Typography,
   message,
 } from 'antd';
+
+const { RangePicker } = DatePicker;
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import {
@@ -25,8 +27,15 @@ import {
   fetchSnapshots,
   updateSnapshot,
 } from '../api/client';
-import type { Position, Snapshot, SnapshotFormValues } from '../types';
+import type { Position, Snapshot, SnapshotFilterParams, SnapshotFormValues } from '../types';
 import { CONTENT_TYPES } from '../types';
+import type { Dayjs } from 'dayjs';
+
+interface SnapshotFilterFormValues {
+  content_type?: string;
+  is_full_post?: boolean;
+  record_date_range?: [Dayjs, Dayjs];
+}
 
 /** 快照记录页（CRUD） */
 export default function SnapshotPage() {
@@ -39,6 +48,8 @@ export default function SnapshotPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Snapshot | null>(null);
   const [form] = Form.useForm<SnapshotFormValues>();
+  const [filterForm] = Form.useForm<SnapshotFilterFormValues>();
+  const [filterParams, setFilterParams] = useState<SnapshotFilterParams>({});
 
   const currentPosition = useMemo(
     () => positions.find((item) => item.id === numericPositionId),
@@ -51,7 +62,7 @@ export default function SnapshotPage() {
     try {
       const [positionList, snapshotList] = await Promise.all([
         fetchPositions(),
-        fetchSnapshots(numericPositionId),
+        fetchSnapshots(numericPositionId, filterParams),
       ]);
       setPositions(positionList);
       setSnapshots(snapshotList);
@@ -60,11 +71,32 @@ export default function SnapshotPage() {
     } finally {
       setLoading(false);
     }
-  }, [numericPositionId]);
+  }, [numericPositionId, filterParams]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const handleFilterSearch = () => {
+    const values = filterForm.getFieldsValue();
+    const params: SnapshotFilterParams = {};
+    if (values.content_type) {
+      params.content_type = values.content_type;
+    }
+    if (values.is_full_post != null) {
+      params.is_full_post = values.is_full_post;
+    }
+    if (values.record_date_range && values.record_date_range.length === 2) {
+      params.record_date_start = dayjs(values.record_date_range[0]).format('YYYY-MM-DD');
+      params.record_date_end = dayjs(values.record_date_range[1]).format('YYYY-MM-DD');
+    }
+    setFilterParams(params);
+  };
+
+  const handleFilterReset = () => {
+    filterForm.resetFields();
+    setFilterParams({});
+  };
 
   const openCreateModal = () => {
     setEditing(null);
@@ -193,6 +225,46 @@ export default function SnapshotPage() {
           {currentPosition?.location ?? ''}
         </Typography.Paragraph>
       </div>
+
+      <Card
+        title="筛选条件"
+        size="small"
+      >
+        <Form form={filterForm} layout="inline">
+          <Form.Item name="content_type" label="内容类型">
+            <Select
+              allowClear
+              placeholder="全部"
+              style={{ width: 120 }}
+              options={CONTENT_TYPES.map((item) => ({ label: item, value: item }))}
+            />
+          </Form.Item>
+          <Form.Item name="is_full_post" label="是否满贴">
+            <Select
+              allowClear
+              placeholder="全部"
+              style={{ width: 120 }}
+              options={[
+                { label: '已满贴', value: true },
+                { label: '未满贴', value: false },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item name="record_date_range" label="记录日期">
+            <RangePicker style={{ width: 260 }} />
+          </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button type="primary" onClick={handleFilterSearch}>
+                查询
+              </Button>
+              <Button onClick={handleFilterReset}>
+                重置
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Card>
 
       <Card
         extra={

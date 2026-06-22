@@ -74,6 +74,15 @@ class ContentTypeCount(BaseModel):
     count: int
 
 
+class SnapshotFilter(BaseModel):
+    """快照筛选参数。"""
+
+    content_type: str | None = None
+    is_full_post: bool | None = None
+    record_date_start: date | None = None
+    record_date_end: date | None = None
+
+
 class StatsOverview(BaseModel):
     """数据统计概览。"""
 

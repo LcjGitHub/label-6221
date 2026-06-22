@@ -3,6 +3,7 @@ import type {
   Position,
   PositionFormValues,
   Snapshot,
+  SnapshotFilterParams,
   SnapshotFormValues,
   StatsOverview,
 } from '../types';
@@ -46,9 +47,27 @@ export async function deletePosition(id: number): Promise<void> {
   await client.delete(`/positions/${id}`);
 }
 
-/** 获取快照列表，可按位置筛选 */
-export async function fetchSnapshots(positionId?: number): Promise<Snapshot[]> {
-  const params = positionId != null ? { position_id: positionId } : undefined;
+/** 获取快照列表，可按位置、内容类型、是否满贴、记录日期范围组合筛选 */
+export async function fetchSnapshots(
+  positionId?: number,
+  filter?: SnapshotFilterParams,
+): Promise<Snapshot[]> {
+  const params: Record<string, unknown> = {};
+  if (positionId != null) {
+    params.position_id = positionId;
+  }
+  if (filter?.content_type) {
+    params.content_type = filter.content_type;
+  }
+  if (filter?.is_full_post != null) {
+    params.is_full_post = filter.is_full_post;
+  }
+  if (filter?.record_date_start) {
+    params.record_date_start = filter.record_date_start;
+  }
+  if (filter?.record_date_end) {
+    params.record_date_end = filter.record_date_end;
+  }
   const { data } = await client.get<Snapshot[]>('/snapshots', { params });
   return data;
 }

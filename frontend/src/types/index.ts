@@ -52,3 +52,11 @@ export interface StatsOverview {
   not_full_post_count: number;
   content_type_counts: ContentTypeCount[];
 }
+
+/** 快照筛选参数 */
+export interface SnapshotFilterParams {
+  content_type?: string;
+  is_full_post?: boolean;
+  record_date_start?: string;
+  record_date_end?: string;
+}

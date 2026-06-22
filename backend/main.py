@@ -1,5 +1,7 @@
 """社区公告栏历史快照 API 服务。"""
 
+from datetime import date
+
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
@@ -156,12 +158,24 @@ def delete_position(position_id: int, db: Session = Depends(get_db)) -> None:
 @app.get("/api/snapshots", response_model=list[schemas.SnapshotRead])
 def list_snapshots(
     position_id: int | None = Query(default=None),
+    content_type: str | None = Query(default=None),
+    is_full_post: bool | None = Query(default=None),
+    record_date_start: date | None = Query(default=None),
+    record_date_end: date | None = Query(default=None),
     db: Session = Depends(get_db),
 ) -> list[schemas.SnapshotRead]:
-    """获取快照列表，可按位置筛选。"""
+    """获取快照列表，可按位置、内容类型、是否满贴、记录日期范围组合筛选。"""
     query = db.query(models.Snapshot).join(models.Position)
     if position_id is not None:
         query = query.filter(models.Snapshot.position_id == position_id)
+    if content_type is not None:
+        query = query.filter(models.Snapshot.content_type == content_type)
+    if is_full_post is not None:
+        query = query.filter(models.Snapshot.is_full_post.is_(is_full_post))
+    if record_date_start is not None:
+        query = query.filter(models.Snapshot.record_date >= record_date_start)
+    if record_date_end is not None:
+        query = query.filter(models.Snapshot.record_date <= record_date_end)
     snapshots = query.order_by(
         models.Snapshot.record_date.desc(), models.Snapshot.id.desc()
     ).all()
