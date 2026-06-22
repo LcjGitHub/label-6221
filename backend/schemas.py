@@ -41,6 +41,7 @@ class SnapshotBase(BaseModel):
     content_type: str = Field(..., min_length=1, max_length=50)
     is_full_post: bool = False
     remark: str = ""
+    inspector_name: str = Field(default="", max_length=50)
 
 
 class SnapshotCreate(SnapshotBase):
@@ -55,6 +56,7 @@ class SnapshotUpdate(BaseModel):
     content_type: str | None = Field(default=None, min_length=1, max_length=50)
     is_full_post: bool | None = None
     remark: str | None = None
+    inspector_name: str | None = Field(default=None, max_length=50)
 
 
 class SnapshotRead(SnapshotBase):

@@ -119,6 +119,7 @@ export default function SnapshotPage() {
       content_type: '通知',
       is_full_post: false,
       remark: '',
+      inspector_name: '',
     });
     setModalOpen(true);
   };
@@ -131,6 +132,7 @@ export default function SnapshotPage() {
       content_type: record.content_type,
       is_full_post: record.is_full_post,
       remark: record.remark,
+      inspector_name: record.inspector_name,
     });
     setModalOpen(true);
   };
@@ -143,6 +145,7 @@ export default function SnapshotPage() {
         content_type: values.content_type,
         is_full_post: values.is_full_post,
         remark: values.remark ?? '',
+        inspector_name: values.inspector_name ?? '',
         record_date: dayjs(values.record_date as string | dayjs.Dayjs).format('YYYY-MM-DD'),
       };
 
@@ -187,6 +190,13 @@ export default function SnapshotPage() {
       key: 'content_type',
       width: 100,
       render: (value: string) => <Tag>{value}</Tag>,
+    },
+    {
+      title: '巡查人',
+      dataIndex: 'inspector_name',
+      key: 'inspector_name',
+      width: 100,
+      render: (value: string) => value || '-',
     },
     {
       title: '是否满贴',
@@ -333,6 +343,9 @@ export default function SnapshotPage() {
           </Form.Item>
           <Form.Item name="content_type" label="内容类型" rules={[{ required: true }]}>
             <Select options={CONTENT_TYPES.map((item) => ({ label: item, value: item }))} />
+          </Form.Item>
+          <Form.Item name="inspector_name" label="巡查人姓名">
+            <Input placeholder="请输入巡查人姓名" maxLength={50} />
           </Form.Item>
           <Form.Item name="is_full_post" label="是否满贴" valuePropName="checked">
             <Switch checkedChildren="满贴" unCheckedChildren="未满" />

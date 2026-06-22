@@ -15,6 +15,7 @@ export interface Snapshot {
   content_type: string;
   is_full_post: boolean;
   remark: string;
+  inspector_name: string;
   created_at: string;
   position_name?: string;
 }
@@ -34,6 +35,7 @@ export interface SnapshotFormValues {
   content_type: string;
   is_full_post: boolean;
   remark: string;
+  inspector_name: string;
 }
 
 /** 内容类型选项 */

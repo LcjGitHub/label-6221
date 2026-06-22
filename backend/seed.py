@@ -29,6 +29,7 @@ def seed_data(db: Session) -> None:
             content_type="通知",
             is_full_post=True,
             remark="端午节放假安排已贴满",
+            inspector_name="张建国",
         ),
         Snapshot(
             position_id=positions[0].id,
@@ -36,6 +37,7 @@ def seed_data(db: Session) -> None:
             content_type="活动",
             is_full_post=False,
             remark="亲子运动会海报，尚有空位",
+            inspector_name="李美玲",
         ),
         Snapshot(
             position_id=positions[0].id,
@@ -43,6 +45,7 @@ def seed_data(db: Session) -> None:
             content_type="物业",
             is_full_post=True,
             remark="停水通知与缴费提醒",
+            inspector_name="王志强",
         ),
         Snapshot(
             position_id=positions[1].id,
@@ -50,6 +53,7 @@ def seed_data(db: Session) -> None:
             content_type="通知",
             is_full_post=False,
             remark="垃圾分类宣传",
+            inspector_name="赵秀兰",
         ),
         Snapshot(
             position_id=positions[1].id,
@@ -57,6 +61,7 @@ def seed_data(db: Session) -> None:
             content_type="活动",
             is_full_post=True,
             remark="社区读书会报名已满",
+            inspector_name="孙文博",
         ),
         Snapshot(
             position_id=positions[1].id,
@@ -64,6 +69,7 @@ def seed_data(db: Session) -> None:
             content_type="其他",
             is_full_post=False,
             remark="志愿者招募启事",
+            inspector_name="陈晓燕",
         ),
     ]
     db.add_all(snapshots)

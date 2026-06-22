@@ -60,6 +60,13 @@ export default function SnapshotSummaryPage() {
       render: (value: string) => <Tag>{value}</Tag>,
     },
     {
+      title: '巡查人',
+      dataIndex: 'inspector_name',
+      key: 'inspector_name',
+      width: 100,
+      render: (value: string) => value || '-',
+    },
+    {
       title: '是否满贴',
       dataIndex: 'is_full_post',
       key: 'is_full_post',

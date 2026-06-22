@@ -38,6 +38,7 @@ class Snapshot(Base):
     content_type: Mapped[str] = mapped_column(String(50), nullable=False)
     is_full_post: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     remark: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    inspector_name: Mapped[str] = mapped_column(String(50), nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )
