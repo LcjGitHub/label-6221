@@ -21,6 +21,12 @@ export interface Snapshot {
 
 import type { Dayjs } from 'dayjs';
 
+/** 创建/编辑位置表单 */
+export interface PositionFormValues {
+  name: string;
+  location: string;
+}
+
 /** 创建/编辑快照表单 */
 export interface SnapshotFormValues {
   position_id: number;

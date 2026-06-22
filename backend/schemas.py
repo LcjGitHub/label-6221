@@ -16,6 +16,13 @@ class PositionCreate(PositionBase):
     """创建位置。"""
 
 
+class PositionUpdate(BaseModel):
+    """更新位置（全部可选）。"""
+
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    location: str | None = Field(default=None, max_length=200)
+
+
 class PositionRead(PositionBase):
     """位置详情。"""
 

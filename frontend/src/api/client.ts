@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Position, Snapshot, SnapshotFormValues } from '../types';
+import type { Position, PositionFormValues, Snapshot, SnapshotFormValues } from '../types';
 
 const client = axios.create({
   baseURL: '/api',
@@ -10,6 +10,26 @@ const client = axios.create({
 export async function fetchPositions(): Promise<Position[]> {
   const { data } = await client.get<Position[]>('/positions');
   return data;
+}
+
+/** 创建公告栏位置 */
+export async function createPosition(payload: PositionFormValues): Promise<Position> {
+  const { data } = await client.post<Position>('/positions', payload);
+  return data;
+}
+
+/** 更新公告栏位置 */
+export async function updatePosition(
+  id: number,
+  payload: Partial<PositionFormValues>,
+): Promise<Position> {
+  const { data } = await client.put<Position>(`/positions/${id}`, payload);
+  return data;
+}
+
+/** 删除公告栏位置 */
+export async function deletePosition(id: number): Promise<void> {
+  await client.delete(`/positions/${id}`);
 }
 
 /** 获取快照列表，可按位置筛选 */

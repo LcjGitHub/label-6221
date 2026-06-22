@@ -61,6 +61,63 @@ def get_position(position_id: int, db: Session = Depends(get_db)) -> schemas.Pos
     return item
 
 
+@app.post("/api/positions", response_model=schemas.PositionRead, status_code=201)
+def create_position(
+    payload: schemas.PositionCreate, db: Session = Depends(get_db)
+) -> schemas.PositionRead:
+    """创建位置，名称不允许重复。"""
+    _ensure_position_name_unique(db, payload.name)
+    position = models.Position(**payload.model_dump())
+    db.add(position)
+    db.commit()
+    db.refresh(position)
+    item = schemas.PositionRead.model_validate(position)
+    item.snapshot_count = 0
+    return item
+
+
+@app.put("/api/positions/{position_id}", response_model=schemas.PositionRead)
+def update_position(
+    position_id: int,
+    payload: schemas.PositionUpdate,
+    db: Session = Depends(get_db),
+) -> schemas.PositionRead:
+    """更新位置，名称不允许重复。"""
+    position = db.get(models.Position, position_id)
+    if not position:
+        raise HTTPException(status_code=404, detail="位置不存在")
+
+    data = payload.model_dump(exclude_unset=True)
+    if "name" in data:
+        _ensure_position_name_unique(db, data["name"], position_id)
+
+    for key, value in data.items():
+        setattr(position, key, value)
+
+    db.commit()
+    db.refresh(position)
+    item = schemas.PositionRead.model_validate(position)
+    item.snapshot_count = len(position.snapshots)
+    return item
+
+
+@app.delete("/api/positions/{position_id}", status_code=204)
+def delete_position(position_id: int, db: Session = Depends(get_db)) -> None:
+    """删除位置，若仍有关联快照则返回错误。"""
+    position = db.get(models.Position, position_id)
+    if not position:
+        raise HTTPException(status_code=404, detail="位置不存在")
+
+    if position.snapshots:
+        raise HTTPException(
+            status_code=400,
+            detail=f"该位置仍关联 {len(position.snapshots)} 条快照记录，无法删除",
+        )
+
+    db.delete(position)
+    db.commit()
+
+
 @app.get("/api/snapshots", response_model=list[schemas.SnapshotRead])
 def list_snapshots(
     position_id: int | None = Query(default=None),
@@ -151,3 +208,19 @@ def _to_snapshot_read(snapshot: models.Snapshot) -> schemas.SnapshotRead:
     if snapshot.position:
         item.position_name = snapshot.position.name
     return item
+
+
+def _ensure_position_name_unique(
+    db: Session, name: str, exclude_id: int | None = None
+) -> None:
+    """
+     * 校验位置名称是否唯一。
+     * @param {Session} db
+     * @param {str} name
+     * @param {int} exclude_id
+     """
+    query = db.query(models.Position).filter(models.Position.name == name)
+    if exclude_id is not None:
+        query = query.filter(models.Position.id != exclude_id)
+    if query.first():
+        raise HTTPException(status_code=400, detail="位置名称已存在")
