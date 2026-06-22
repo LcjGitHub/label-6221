@@ -8,6 +8,7 @@ import {
   Input,
   Modal,
   Popconfirm,
+  Radio,
   Select,
   Space,
   Switch,
@@ -33,7 +34,6 @@ import type { Dayjs } from 'dayjs';
 
 interface SnapshotFilterFormValues {
   content_type?: string;
-  is_full_post?: boolean;
   record_date_range?: [Dayjs, Dayjs];
 }
 
@@ -50,6 +50,8 @@ export default function SnapshotPage() {
   const [form] = Form.useForm<SnapshotFormValues>();
   const [filterForm] = Form.useForm<SnapshotFilterFormValues>();
   const [filterParams, setFilterParams] = useState<SnapshotFilterParams>({});
+  const [filterFullPostEnabled, setFilterFullPostEnabled] = useState(false);
+  const [filterFullPostValue, setFilterFullPostValue] = useState(true);
 
   const currentPosition = useMemo(
     () => positions.find((item) => item.id === numericPositionId),
@@ -77,26 +79,37 @@ export default function SnapshotPage() {
     loadData();
   }, [loadData]);
 
-  const handleFilterSearch = () => {
-    const values = filterForm.getFieldsValue();
-    const params: SnapshotFilterParams = {};
-    if (values.content_type) {
-      params.content_type = values.content_type;
-    }
-    if (values.is_full_post != null) {
-      params.is_full_post = values.is_full_post;
-    }
-    if (values.record_date_range && values.record_date_range.length === 2) {
-      params.record_date_start = dayjs(values.record_date_range[0]).format('YYYY-MM-DD');
-      params.record_date_end = dayjs(values.record_date_range[1]).format('YYYY-MM-DD');
-    }
-    setFilterParams(params);
-  };
+  const applyFilter = useCallback(
+    (overrides?: { fullPostEnabled?: boolean; fullPostValue?: boolean }) => {
+      const values = filterForm.getFieldsValue();
+      const params: SnapshotFilterParams = {};
+      if (values.content_type) {
+        params.content_type = values.content_type;
+      }
+      const enabled = overrides?.fullPostEnabled ?? filterFullPostEnabled;
+      const fullPostVal = overrides?.fullPostValue ?? filterFullPostValue;
+      if (enabled) {
+        params.is_full_post = fullPostVal;
+      }
+      if (values.record_date_range && values.record_date_range.length === 2) {
+        params.record_date_start = dayjs(values.record_date_range[0]).format('YYYY-MM-DD');
+        params.record_date_end = dayjs(values.record_date_range[1]).format('YYYY-MM-DD');
+      }
+      setFilterParams(params);
+    },
+    [filterForm, filterFullPostEnabled, filterFullPostValue],
+  );
 
-  const handleFilterReset = () => {
+  const handleFilterSearch = useCallback(() => {
+    applyFilter();
+  }, [applyFilter]);
+
+  const handleFilterReset = useCallback(() => {
     filterForm.resetFields();
+    setFilterFullPostEnabled(false);
+    setFilterFullPostValue(true);
     setFilterParams({});
-  };
+  }, [filterForm]);
 
   const openCreateModal = () => {
     setEditing(null);
@@ -230,7 +243,7 @@ export default function SnapshotPage() {
         title="筛选条件"
         size="small"
       >
-        <Form form={filterForm} layout="inline">
+        <Form form={filterForm} layout="inline" onValuesChange={() => applyFilter()}>
           <Form.Item name="content_type" label="内容类型">
             <Select
               allowClear
@@ -239,16 +252,33 @@ export default function SnapshotPage() {
               options={CONTENT_TYPES.map((item) => ({ label: item, value: item }))}
             />
           </Form.Item>
-          <Form.Item name="is_full_post" label="是否满贴">
-            <Select
-              allowClear
-              placeholder="全部"
-              style={{ width: 120 }}
-              options={[
-                { label: '已满贴', value: true },
-                { label: '未满贴', value: false },
-              ]}
-            />
+          <Form.Item label="是否满贴">
+            <Space>
+              <Switch
+                checked={filterFullPostEnabled}
+                onChange={(checked) => {
+                  setFilterFullPostEnabled(checked);
+                  applyFilter({ fullPostEnabled: checked });
+                }}
+                checkedChildren="筛选"
+                unCheckedChildren="全部"
+              />
+              {filterFullPostEnabled && (
+                <Radio.Group
+                  value={filterFullPostValue}
+                  onChange={(e) => {
+                    setFilterFullPostValue(e.target.value);
+                    applyFilter({ fullPostValue: e.target.value });
+                  }}
+                  optionType="button"
+                  buttonStyle="solid"
+                  size="small"
+                >
+                  <Radio.Button value={true}>已满贴</Radio.Button>
+                  <Radio.Button value={false}>未满贴</Radio.Button>
+                </Radio.Group>
+              )}
+            </Space>
           </Form.Item>
           <Form.Item name="record_date_range" label="记录日期">
             <RangePicker style={{ width: 260 }} />
