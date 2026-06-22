@@ -3,6 +3,7 @@ import { Layout } from 'antd';
 import AppHeader from './components/AppHeader';
 import PositionListPage from './pages/PositionListPage';
 import SnapshotPage from './pages/SnapshotPage';
+import SnapshotSummaryPage from './pages/SnapshotSummaryPage';
 
 const { Content } = Layout;
 
@@ -15,6 +16,7 @@ export default function App() {
         <Content style={{ padding: '24px', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
           <Routes>
             <Route path="/" element={<PositionListPage />} />
+            <Route path="/snapshots/summary" element={<SnapshotSummaryPage />} />
             <Route path="/positions/:positionId/snapshots" element={<SnapshotPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

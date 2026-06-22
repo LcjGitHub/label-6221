@@ -47,6 +47,12 @@ export async function fetchSnapshots(positionId?: number): Promise<Snapshot[]> {
   return data;
 }
 
+/** 获取所有位置的全部快照（全局汇总） */
+export async function fetchAllSnapshots(): Promise<Snapshot[]> {
+  const { data } = await client.get<Snapshot[]>('/snapshots');
+  return data;
+}
+
 /** 创建快照 */
 export async function createSnapshot(payload: SnapshotFormValues): Promise<Snapshot> {
   const { data } = await client.post<Snapshot>('/snapshots', payload);
