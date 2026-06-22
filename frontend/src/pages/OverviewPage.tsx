@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  Alert,
+  Button,
   Card,
   Col,
   Progress,
@@ -15,6 +17,7 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   FileTextOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 import { fetchStatsOverview } from '../api/client';
 import type { StatsOverview } from '../types';
@@ -31,14 +34,18 @@ const CONTENT_TYPE_COLORS: Record<string, string> = {
 export default function OverviewPage() {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<StatsOverview | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setErrorMsg(null);
     try {
       const data = await fetchStatsOverview();
       setStats(data);
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : '加载统计数据失败，请确认后端已启动';
+      setErrorMsg(errMsg);
+      setStats(null);
       message.error(errMsg);
     } finally {
       setLoading(false);
@@ -52,9 +59,41 @@ export default function OverviewPage() {
   const fullPostPercent =
     stats && stats.total_count > 0 ? Math.round((stats.full_post_count / stats.total_count) * 100) : 0;
 
-  const maxContentTypeCount = stats
-    ? Math.max(...stats.content_type_counts.map((item) => item.count), 1)
-    : 1;
+  const notFullPostPercent =
+    stats && stats.total_count > 0
+      ? Math.round((stats.not_full_post_count / stats.total_count) * 100)
+      : 0;
+
+  const getContentTypePercent = (count: number) => {
+    if (!stats || stats.total_count === 0) return 0;
+    return Math.round((count / stats.total_count) * 100);
+  };
+
+  if (errorMsg) {
+    return (
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <div>
+          <Title level={3} style={{ margin: '8px 0' }}>
+            数据统计概览
+          </Title>
+          <Paragraph type="secondary" style={{ marginBottom: 0 }}>
+            快照总量、满贴状态以及按内容类型分布的整体统计情况
+          </Paragraph>
+        </div>
+        <Alert
+          type="error"
+          showIcon
+          message="数据加载失败"
+          description={errorMsg}
+          action={
+            <Button size="small" type="primary" icon={<ReloadOutlined />} onClick={loadData}>
+              重新加载
+            </Button>
+          }
+        />
+      </Space>
+    );
+  }
 
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -131,7 +170,7 @@ export default function OverviewPage() {
                   <Tag color="green">{stats?.not_full_post_count ?? 0} 条</Tag>
                 </div>
                 <Progress
-                  percent={100 - fullPostPercent}
+                  percent={notFullPostPercent}
                   strokeColor="#389e0d"
                   showInfo={false}
                 />
@@ -144,7 +183,7 @@ export default function OverviewPage() {
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
               {stats && stats.content_type_counts.length > 0 ? (
                 stats.content_type_counts.map((item) => {
-                  const percent = Math.round((item.count / maxContentTypeCount) * 100);
+                  const percent = getContentTypePercent(item.count);
                   const color = CONTENT_TYPE_COLORS[item.content_type] ?? '#1677ff';
                   return (
                     <div key={item.content_type}>
@@ -158,7 +197,9 @@ export default function OverviewPage() {
                         <span>
                           <Tag color={color}>{item.content_type}</Tag>
                         </span>
-                        <span style={{ color: '#666' }}>{item.count} 条</span>
+                        <span style={{ color: '#666' }}>
+                          {item.count} 条 · {percent}%
+                        </span>
                       </div>
                       <Progress percent={percent} strokeColor={color} showInfo={false} />
                     </div>

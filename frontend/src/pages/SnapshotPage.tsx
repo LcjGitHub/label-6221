@@ -184,7 +184,7 @@ export default function SnapshotPage() {
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
       <div>
         <Typography.Link>
-          <Link to="/">← 返回位置列表</Link>
+          <Link to="/positions">← 返回位置列表</Link>
         </Typography.Link>
         <Typography.Title level={3} style={{ margin: '8px 0' }}>
           {currentPosition?.name ?? '快照记录'}
