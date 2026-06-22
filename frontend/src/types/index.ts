@@ -38,3 +38,17 @@ export interface SnapshotFormValues {
 
 /** 内容类型选项 */
 export const CONTENT_TYPES = ['通知', '活动', '物业', '其他'] as const;
+
+/** 按内容类型分组的数量 */
+export interface ContentTypeCount {
+  content_type: string;
+  count: number;
+}
+
+/** 数据统计概览 */
+export interface StatsOverview {
+  total_count: number;
+  full_post_count: number;
+  not_full_post_count: number;
+  content_type_counts: ContentTypeCount[];
+}

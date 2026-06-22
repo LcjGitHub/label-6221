@@ -65,3 +65,19 @@ class SnapshotRead(SnapshotBase):
     id: int
     created_at: datetime
     position_name: str | None = None
+
+
+class ContentTypeCount(BaseModel):
+    """按内容类型分组的数量。"""
+
+    content_type: str
+    count: int
+
+
+class StatsOverview(BaseModel):
+    """数据统计概览。"""
+
+    total_count: int
+    full_post_count: int
+    not_full_post_count: int
+    content_type_counts: list[ContentTypeCount]

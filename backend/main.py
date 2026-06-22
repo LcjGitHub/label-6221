@@ -2,6 +2,7 @@
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 import models
@@ -36,6 +37,40 @@ def on_startup() -> None:
 def health() -> dict:
     """健康检查。"""
     return {"status": "ok"}
+
+
+@app.get("/api/stats/overview", response_model=schemas.StatsOverview)
+def get_stats_overview(db: Session = Depends(get_db)) -> schemas.StatsOverview:
+    """获取数据统计概览。"""
+    total_count = db.query(func.count(models.Snapshot.id)).scalar() or 0
+    full_post_count = (
+        db.query(func.count(models.Snapshot.id))
+        .filter(models.Snapshot.is_full_post.is_(True))
+        .scalar()
+        or 0
+    )
+    not_full_post_count = total_count - full_post_count
+
+    content_type_rows = (
+        db.query(
+            models.Snapshot.content_type,
+            func.count(models.Snapshot.id).label("count"),
+        )
+        .group_by(models.Snapshot.content_type)
+        .order_by(func.count(models.Snapshot.id).desc())
+        .all()
+    )
+    content_type_counts = [
+        schemas.ContentTypeCount(content_type=row.content_type, count=row.count)
+        for row in content_type_rows
+    ]
+
+    return schemas.StatsOverview(
+        total_count=total_count,
+        full_post_count=full_post_count,
+        not_full_post_count=not_full_post_count,
+        content_type_counts=content_type_counts,
+    )
 
 
 @app.get("/api/positions", response_model=list[schemas.PositionRead])

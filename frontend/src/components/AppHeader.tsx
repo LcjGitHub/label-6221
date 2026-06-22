@@ -1,6 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Layout, Menu, Typography } from 'antd';
-import { FileTextOutlined, HomeOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import {
+  AreaChartOutlined,
+  FileTextOutlined,
+  HomeOutlined,
+  UnorderedListOutlined,
+} from '@ant-design/icons';
 
 const { Header } = Layout;
 
@@ -9,9 +14,12 @@ export default function AppHeader() {
   const location = useLocation();
 
   const getSelectedKey = () => {
+    if (location.pathname === '/' || location.pathname.startsWith('/overview'))
+      return 'overview';
     if (location.pathname.startsWith('/snapshots/summary')) return 'summary';
     if (location.pathname.startsWith('/positions/')) return 'snapshots';
-    return 'positions';
+    if (location.pathname.startsWith('/positions')) return 'positions';
+    return 'overview';
   };
 
   return (
@@ -34,9 +42,14 @@ export default function AppHeader() {
         style={{ flex: 1, minWidth: 0, background: 'transparent' }}
         items={[
           {
+            key: 'overview',
+            icon: <AreaChartOutlined />,
+            label: <Link to="/">数据概览</Link>,
+          },
+          {
             key: 'positions',
             icon: <HomeOutlined />,
-            label: <Link to="/">位置列表</Link>,
+            label: <Link to="/positions">位置列表</Link>,
           },
           {
             key: 'summary',

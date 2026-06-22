@@ -1,5 +1,11 @@
 import axios from 'axios';
-import type { Position, PositionFormValues, Snapshot, SnapshotFormValues } from '../types';
+import type {
+  Position,
+  PositionFormValues,
+  Snapshot,
+  SnapshotFormValues,
+  StatsOverview,
+} from '../types';
 
 const client = axios.create({
   baseURL: '/api',
@@ -65,4 +71,10 @@ export async function updateSnapshot(
 /** 删除快照 */
 export async function deleteSnapshot(id: number): Promise<void> {
   await client.delete(`/snapshots/${id}`);
+}
+
+/** 获取数据统计概览 */
+export async function fetchStatsOverview(): Promise<StatsOverview> {
+  const { data } = await client.get<StatsOverview>('/stats/overview');
+  return data;
 }
